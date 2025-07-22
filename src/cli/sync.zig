@@ -33,9 +33,7 @@ pub fn sync() !void {
 
     const config = result.value;
     const home_dir = try std.process.getEnvVarOwned(allocator, "HOME");
-
-    const dotfile_path_buffer = try allocator.alloc(u8, 256);
-    defer allocator.free(dotfile_path_buffer);
+    defer allocator.free(home_dir);
 
     for (config.dotfiles.files) |file| {
         const mounted_dotfile_source = std.fmt.bufPrint(
