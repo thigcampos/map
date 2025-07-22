@@ -28,7 +28,10 @@ pub fn sync() !void {
     var parser = toml.Parser(Config).init(allocator);
     defer parser.deinit();
 
-    const result = parser.parseFile("dot.toml") catch |err| return err;
+    const result = parser.parseFile("dot.toml") catch {
+        std.debug.print("Could not find dot.toml.\n", .{});
+        return;
+    };
     defer result.deinit();
 
     const config = result.value;
@@ -36,19 +39,17 @@ pub fn sync() !void {
     defer allocator.free(home_dir);
 
     for (config.dotfiles.files) |file| {
-        const mounted_dotfile_source = std.fmt.bufPrint(
-            dotfile_path_buffer,
+        const mounted_dotfile_source = try std.fmt.allocPrint(
+            allocator,
             "./{s}/{s}",
             .{ config.dot.dotpath, file.source },
-        ) catch |err| {
-            return err;
-        };
-        const output_buffer = try allocator.alloc(u8, file.destination.len + home_dir.len - 1);
-        defer allocator.free(output_buffer);
+        );
+        defer allocator.free(mounted_dotfile_source);
 
-        _ = std.mem.replace(u8, file.destination, "~", home_dir, output_buffer);
+        const output_path = try std.mem.replaceOwned(u8, allocator, file.destination, "~", home_dir);
+        defer allocator.free(output_path);
 
-        std.posix.symlink(mounted_dotfile_source, output_buffer) catch |err| {
+        std.posix.symlink(mounted_dotfile_source, output_path) catch |err| {
             switch (err) {
                 error.PathAlreadyExists => std.debug.print("Yay, it is already created\n", .{}),
                 else => return err,
