@@ -1,0 +1,8 @@
+[dot]
+dotpath = 'dotfiles'
+
+[dotfiles]
+files = [
+    { source = '.gitconfig', destination = '~/.gitconfig' },
+    { source = '.bashrc', destination = '~/.bashrc' },
+]
