@@ -54,7 +54,7 @@ pub fn sync() !void {
 
         std.posix.symlink(mounted_dotfile_source, output_path) catch |err| {
             switch (err) {
-                error.PathAlreadyExists => std.debug.print("Yay, it is already created\n", .{}),
+                error.PathAlreadyExists => std.debug.print("{s} already synced.\n", .{file.source}),
                 else => return err,
             }
         };
