@@ -38,11 +38,14 @@ pub fn sync() !void {
     const home_dir = try std.process.getEnvVarOwned(allocator, "HOME");
     defer allocator.free(home_dir);
 
+    const pwd = try std.process.getEnvVarOwned(allocator, "PWD");
+    defer allocator.free(pwd);
+
     for (config.dotfiles.files) |file| {
         const mounted_dotfile_source = try std.fmt.allocPrint(
             allocator,
-            "./{s}/{s}",
-            .{ config.dot.dotpath, file.source },
+            "{s}/{s}/{s}",
+            .{ pwd, config.dot.dotpath, file.source },
         );
         defer allocator.free(mounted_dotfile_source);
 
