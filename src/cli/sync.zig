@@ -1,24 +1,8 @@
 const std = @import("std");
 const toml = @import("toml");
 
-const DotfilesHashMap = struct {
-    source: []const u8,
-    destination: []const u8,
-};
-
-const Dotfiles = struct {
-    files: []DotfilesHashMap,
-};
-
-const Dot = struct {
-    source_path: []const u8,
-};
-
-// Represents the whole dot.toml config file
-const Config = struct {
-    dot: Dot,
-    dotfiles: Dotfiles,
-};
+const Config = @import("../config/dot_toml.zig").Config;
+const parseDotToml = @import("../config/parse_toml.zig").parseDotToml;
 
 pub fn sync() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -28,13 +12,8 @@ pub fn sync() !void {
     var parser = toml.Parser(Config).init(allocator);
     defer parser.deinit();
 
-    const result = parser.parseFile("dot.toml") catch {
-        std.debug.print("Could not find dot.toml.\n", .{});
-        return;
-    };
-    defer result.deinit();
+    const config = try parseDotToml(allocator);
 
-    const config = result.value;
     const home_dir = try std.process.getEnvVarOwned(allocator, "HOME");
     defer allocator.free(home_dir);
 
@@ -62,6 +41,5 @@ pub fn sync() !void {
             }
         };
         std.debug.print("Successfully synced {s}.\n", .{file.source});
-
     }
 }
