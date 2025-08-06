@@ -11,7 +11,7 @@ const Dotfiles = struct {
 };
 
 const Dot = struct {
-    dotpath: []const u8,
+    source_path: []const u8,
 };
 
 // Represents the whole dot.toml config file
@@ -45,7 +45,7 @@ pub fn sync() !void {
         const mounted_dotfile_source = try std.fmt.allocPrint(
             allocator,
             "{s}/{s}/{s}",
-            .{ pwd, config.dot.dotpath, file.source },
+            .{ pwd, config.dot.source_path, file.source },
         );
         defer allocator.free(mounted_dotfile_source);
 
