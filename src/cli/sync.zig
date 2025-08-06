@@ -7,18 +7,16 @@ const parseDotToml = @import("../config/parse_toml.zig").parseDotToml;
 pub fn sync() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
 
-    var parser = toml.Parser(Config).init(allocator);
-    defer parser.deinit();
+    var arena = std.heap.ArenaAllocator.init(gpa.allocator());
+    defer arena.deinit();
+    const allocator = arena.allocator();
 
     const config = try parseDotToml(allocator);
 
     const home_dir = try std.process.getEnvVarOwned(allocator, "HOME");
-    defer allocator.free(home_dir);
 
     const pwd = try std.process.getEnvVarOwned(allocator, "PWD");
-    defer allocator.free(pwd);
 
     for (config.dotfiles.files) |file| {
         const mounted_dotfile_source = try std.fmt.allocPrint(
@@ -26,10 +24,8 @@ pub fn sync() !void {
             "{s}/{s}/{s}",
             .{ pwd, config.dot.source_path, file.source },
         );
-        defer allocator.free(mounted_dotfile_source);
 
         const output_path = try std.mem.replaceOwned(u8, allocator, file.destination, "~", home_dir);
-        defer allocator.free(output_path);
 
         std.posix.symlink(mounted_dotfile_source, output_path) catch |err| {
             switch (err) {
