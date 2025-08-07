@@ -1,5 +1,5 @@
 [dot]
-dotpath = 'dotfiles'
+source_path = 'dotfiles'
 
 [dotfiles]
 files = [
