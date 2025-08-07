@@ -1,4 +1,5 @@
 const std = @import("std");
+
 const DotfilesHashMap = struct {
     source: []const u8,
     destination: []const u8,
