@@ -2,27 +2,34 @@
 Dot is an elegant and simple dotfiles manager for *unix, inspired by [GNU Stow](https://www.gnu.org/software/stow/).
 
 ## Usage
-Initially, you must create the package within your dotfiles directory:
+Initially, place you dotfiles in the folder you use to manage them. Then, map the structure to a config file called `dot.toml` like this:
 
-```sh
-# Creating a package for nvim
-mkdir nvim/.config/
-mv ~/.config/nvim nvim/.config/nvim
+```toml
+[dot]
+source_path = 'dotfiles' # the base folder where your dotfiles are centralized
+
+[dotfiles]
+files = [ # list of dotfiles
+    { 
+        source = '.gitconfig', # source dotfile (considering the source path as base)
+        destination = '~/.gitconfig' # place where you be in your machine (use absolute path or the ~ to represent HOME
+    },
+    { source = '.bashrc', destination = '~/.bashrc' },
+]
 ```
 
-With your *dot* packages available, you can push them to your machine:
+With your *dot* packages available, you can sync them to the right place in your machine:
+
 
 ```sh
-dot nvim
+dot sync
 ```
 
-```sh
-dot ghostty
-```
+> `dot sync` works by creating symbolic links.
 
 ## Roadmap 
 - [X] Move away from Swift adopting Rust or Zig languages
-- [X] Include support to "dot-" prefix pre-processing based on a --dotfiles flag (similar to `stow <package> --dotfiles` behavior);
+- [ ] Include support to "dot-" prefix pre-processing based on a --dotfiles flag (similar to `stow <package> --dotfiles` behavior);
 - [ ] Include a command to add a package in the dot directory, using --adopt flag (running the `mkdir` and `mv` commands can be quite boring);
 
 ## Installation
